@@ -89,9 +89,15 @@ body{background:#111;font-family:"Segoe UI",sans-serif;overflow:hidden;width:100
 #g-phase-label{color:#ffe066;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;}
 #g-prog-wrap{flex:1;height:14px;background:#020802;border-radius:7px;overflow:hidden;position:relative;min-width:30px;}
 #g-prog-bar{height:100%;background:linear-gradient(90deg,#ff3333,#ff8800,#ffee00);width:0%;transition:width .3s;}
-#g-drops-ui{display:flex;align-items:center;gap:2px;color:#fff;font-size:15px;font-weight:700;flex-shrink:0;}
-#g-drops-ui img{width:13px;height:18px;object-fit:contain;}
-#g-deck{display:flex;gap:3px;overflow-x:auto;flex-shrink:0;max-width:56vw;}
+#g-hdr{display:flex;flex-direction:column;background:#060f02;border-bottom:3px solid #020802;flex-shrink:0;}
+#g-hdr-top{display:flex;align-items:center;gap:5px;padding:4px 6px;}
+#g-phase-label{color:#ffe066;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+#g-prog-wrap{flex:1;height:14px;background:#020802;border-radius:7px;overflow:hidden;position:relative;min-width:30px;}
+#g-prog-bar{height:100%;background:linear-gradient(90deg,#ff3333,#ff8800,#ffee00);width:0%;transition:width .3s;}
+#g-drops-ui{display:flex;align-items:center;gap:2px;color:#fff;font-size:13px;font-weight:700;flex-shrink:0;}
+#g-drops-ui img{width:11px;height:16px;object-fit:contain;}
+#g-hdr-bot{display:flex;align-items:center;gap:4px;padding:3px 6px;}
+#g-deck{display:flex;gap:3px;overflow-x:auto;flex:1;min-width:0;}
 #g-deck::-webkit-scrollbar{height:3px;}
 .gcard{width:44px;height:50px;background:#ffe8a0;border:2px solid #7a3e18;border-radius:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:all .1s;flex-shrink:0;}
 .gcard:hover:not(.poor){border-color:#1a8000;transform:scale(1.06);}
@@ -125,6 +131,23 @@ canvas#gc{display:block;}
 
 /* Toast */
 #toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:#1a7800;color:#fff;padding:9px 22px;border-radius:22px;font-size:13px;font-weight:700;display:none;z-index:600;border:2px solid #0a3800;white-space:nowrap;pointer-events:none;}
+
+/* AD OVERLAY */
+#ovl-ad{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:800;}
+#ovl-ad.on{display:flex;}
+#ad-box{background:#0a0a1a;border:3px solid #333;border-radius:20px;width:min(340px,90vw);overflow:hidden;text-align:center;position:relative;}
+#ad-badge{background:#cc0000;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;letter-spacing:1px;text-transform:uppercase;}
+#ad-content{padding:20px 18px 14px;}
+#ad-brand-icon{font-size:48px;margin-bottom:8px;}
+#ad-title{color:#fff;font-size:17px;font-weight:900;margin-bottom:5px;}
+#ad-sub{color:#aaa;font-size:12px;line-height:1.5;margin-bottom:14px;}
+#ad-cta{background:linear-gradient(135deg,#ff6600,#cc3300);color:#fff;border:none;border-radius:22px;padding:10px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;}
+#ad-cta:hover{filter:brightness(1.15);}
+#ad-skip-wrap{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 0 14px;border-top:1px solid #222;}
+#ad-skip-btn{background:transparent;border:2px solid #555;color:#aaa;border-radius:14px;padding:5px 16px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .2s;}
+#ad-skip-btn:hover:not(:disabled){border-color:#aaa;color:#fff;}
+#ad-skip-btn:disabled{opacity:.45;cursor:not-allowed;}
+#ad-timer{color:#888;font-size:11px;}
 </style>
 </head>
 <body>
@@ -158,7 +181,6 @@ canvas#gc{display:block;}
       </div>
     </div>
     <button class="btn sm" onclick="show('s-menu')" id="t-exit">Sair</button>
-    <button class="btn sm" onclick="resetSave()" style="background:#5a0a0a;margin-top:8px;">🗑️ <span id="t-reset">Apagar progresso</span></button>
   </div>
 </div>
 
@@ -206,13 +228,17 @@ canvas#gc{display:block;}
 <!-- GAME -->
 <div id="s-game" class="scr">
   <div id="g-hdr">
-    <span id="g-phase-label">Fase 1</span>
-    <div id="g-prog-wrap"><div id="g-prog-bar"></div></div>
-    <div id="g-drops-ui"><img id="g-drop-icon" src=""><span id="g-drop-count">5</span></div>
-    <div id="g-deck"></div>
-    <span id="save-ind" style="font-size:11px;color:#88ff88;opacity:0;transition:opacity .4s;flex-shrink:0;">💾</span>
-    <button class="btn sm" onclick="confirmRestart()" style="padding:4px 8px;flex-shrink:0;">🔄</button>
-    <button class="btn sm" onclick="pauseGame()" style="padding:4px 8px;flex-shrink:0;">⏸</button>
+    <div id="g-hdr-top">
+      <span id="g-phase-label">Fase 1</span>
+      <div id="g-prog-wrap"><div id="g-prog-bar"></div></div>
+      <div id="g-drops-ui"><img id="g-drop-icon" src=""><span id="g-drop-count">5</span></div>
+      <span id="save-ind" style="font-size:11px;color:#88ff88;opacity:0;transition:opacity .4s;flex-shrink:0;">💾</span>
+    </div>
+    <div id="g-hdr-bot">
+      <div id="g-deck"></div>
+      <button class="btn sm" onclick="confirmRestart()" style="padding:4px 8px;flex-shrink:0;">🔄</button>
+      <button class="btn sm" onclick="pauseGame()" style="padding:4px 8px;flex-shrink:0;">⏸</button>
+    </div>
   </div>
   <div id="g-board-wrap"><div id="g-board"><canvas id="gc"></canvas></div></div>
 </div>
@@ -238,6 +264,36 @@ canvas#gc{display:block;}
     </div>
   </div>
 </div>
+
+<!-- ENDING OVERLAY — fase 40 -->
+<div id="ovl-end" class="ovl" style="z-index:700;background:rgba(0,0,0,0.85);">
+  <div class="ovbox" style="max-width:420px;text-align:center;padding:32px 28px;">
+    <div id="end-confetti" style="font-size:36px;letter-spacing:6px;margin-bottom:8px;">🌿🏆🌿</div>
+    <h2 id="end-title" style="color:#ffd700;font-size:28px;margin:0 0 8px;">Parabéns!</h2>
+    <p id="end-sub" style="color:#fff;font-size:15px;margin:0 0 16px;line-height:1.6;"></p>
+    <div id="end-credits" style="background:rgba(255,255,255,0.08);border-radius:12px;padding:14px 16px;margin-bottom:20px;color:#ccc;font-size:13px;line-height:1.8;"></div>
+    <button class="btn sm green" onclick="closeEnding()">🏠 <span id="end-btn">Voltar ao Menu</span></button>
+  </div>
+</div>
+
+<!-- PLANT TUTORIAL OVERLAY -->
+<div id="ovl-tutorial" class="ovl" style="z-index:600;">
+  <div class="ovbox" style="max-width:380px;position:relative;">
+    <div id="tut-new-plant-label" style="font-size:13px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">🌿 Nova planta desbloqueada!</div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
+      <img id="tut-img" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,.3));" src="">
+      <div>
+        <div id="tut-name" style="font-size:20px;font-weight:900;color:#1a5000;margin-bottom:3px;"></div>
+        <div id="tut-cost" style="font-size:13px;color:#0055cc;font-weight:700;margin-bottom:5px;"></div>
+        <div id="tut-desc" style="font-size:13px;color:#444;line-height:1.5;"></div>
+      </div>
+    </div>
+    <div id="tut-tip" style="background:#f0ffe0;border:2px solid #2a7800;border-radius:10px;padding:9px 13px;font-size:12px;color:#1a5000;line-height:1.6;margin-bottom:13px;"></div>
+    <div class="ovbtns">
+      <button class="btn sm green" onclick="closeTutorial()" id="tut-understood-btn">✔ Entendido!</button>
+    </div>
+  </div>
+</div>
 <div id="ovl-lose" class="ovl">
   <div class="ovbox">
     <h2 style="color:#cc2200">💀 <span id="t-defeat">Derrota!</span></h2>
@@ -245,6 +301,23 @@ canvas#gc{display:block;}
     <div class="ovbtns">
       <button class="btn sm green" onclick="retryPhase()"><span id="t-retry">🔄 Tentar Novamente</span></button>
       <button class="btn sm" onclick="quitGame()"><span id="t-menu3">🏠 Menu</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- AD OVERLAY — aparece a cada 5 fases ganhas -->
+<div id="ovl-ad">
+  <div id="ad-box">
+    <div id="ad-badge">📢 Anúncio — suporte ao jogo gratuito</div>
+    <div id="ad-content">
+      <div id="ad-brand-icon"></div>
+      <div id="ad-title"></div>
+      <div id="ad-sub"></div>
+      <button id="ad-cta" onclick="adCTAClick()"></button>
+    </div>
+    <div id="ad-skip-wrap">
+      <button id="ad-skip-btn" disabled onclick="closeAd()"></button>
+      <span id="ad-timer"></span>
     </div>
   </div>
 </div>
@@ -300,6 +373,10 @@ const TR = {
     'next':'▶ Próxima Fase','go':'Jogar','events-title':'Eventos',
     'no-events':'Sem eventos disponíveis<br><small>(Teremos em breve)</small>',
     'no-drops':'💧 Gotas insuficientes!','recharging':'⏳ Recarregando!',
+    'new-plant':'🌿 Nova planta desbloqueada!','understood':'✔ Entendido!',
+    'cost-label':'💧 Custo:','recharge-label':'gotas | Recarga:',
+    'phase':'Fase','complete':'completa!','unlocked':'desbloqueada!',
+    'grid-only':'⚠️ Só nos quadradinhos!','occupied':'⚠️ Célula ocupada!',
   },
   en:{
     'play':'Play','events':'Events','settings':'Settings','language':'Language:',
@@ -310,6 +387,10 @@ const TR = {
     'next':'▶ Next Phase','go':'Play','events-title':'Events',
     'no-events':'No events available<br><small>(Coming soon)</small>',
     'no-drops':'💧 Not enough drops!','recharging':'⏳ Recharging!',
+    'new-plant':'🌿 New plant unlocked!','understood':'✔ Got it!',
+    'cost-label':'💧 Cost:','recharge-label':'drops | Recharge:',
+    'phase':'Phase','complete':'complete!','unlocked':'unlocked!',
+    'grid-only':'⚠️ Place on the grid only!','occupied':'⚠️ Cell occupied!',
   }
 };
 let lang='pt', langIdx=0;
@@ -329,6 +410,11 @@ function applyLang(){
     const el=document.getElementById(id);
     if(el) el.innerHTML=tr(id.replace('t-','').replace(/\d+$/,''));
   });
+  // tutorial overlay static texts
+  const tnp=document.getElementById('tut-new-plant-label');
+  if(tnp) tnp.textContent=tr('new-plant');
+  const tub=document.getElementById('tut-understood-btn');
+  if(tub) tub.textContent=tr('understood');
 }
 function chgLang(d){
   langIdx=(langIdx+d+LANGS.length)%LANGS.length;
@@ -352,8 +438,8 @@ function playMusic(id){
   if(curAud){ curAud.pause(); curAud.currentTime=0; }
   curAud=document.getElementById(id);
   if(curAud){
-    // Música do tabuleiro bem mais alta que win/lose
-    curAud.volume = (id==='aud-phase') ? 0.40 : 0.55;
+    // Volume reduzido em 60%
+    curAud.volume = (id==='aud-phase') ? 0.16 : 0.22;
     curAud.play().catch(()=>{});
   }
 }
@@ -364,12 +450,14 @@ function stopMusic(){ if(curAud){ curAud.pause(); curAud.currentTime=0; curAud=n
 // SAVE / LOAD
 // ─────────────────────────────────────────────────────────────────────────────
 const SAVE_KEY = 'greenyard_save';
+const SAVE_VERSION = 2; // v2 = fases bloqueadas por padrão
 let unlockedPhases=[1];
 let unlockedPlants=['disparacai'];
 
 async function save(){
   try {
     const data = {
+      v: SAVE_VERSION,
       unlockedPhases: unlockedPhases,
       unlockedPlants: unlockedPlants,
       lang: lang,
@@ -377,10 +465,11 @@ async function save(){
       ts: Date.now()
     };
     const json = JSON.stringify(data);
-    if(window.storage){
-      await window.storage.set(SAVE_KEY, json);
-    } else {
-      localStorage.setItem(SAVE_KEY, json);
+    // Salva no localStorage
+    try{ localStorage.setItem(SAVE_KEY, json); } catch(e){}
+    // Salva no window.storage (persiste entre sessões no Claude)
+    if(typeof window.storage !== 'undefined'){
+      try{ await window.storage.set(SAVE_KEY, json); } catch(e){}
     }
     const ind = document.getElementById('save-ind');
     if(ind){ ind.style.opacity='1'; setTimeout(()=>ind.style.opacity='0',1200); }
@@ -390,17 +479,23 @@ async function save(){
 async function loadSave(){
   try {
     let raw = null;
-    if(window.storage){
-      try{ const res = await window.storage.get(SAVE_KEY); raw = res ? res.value : null; } catch(e){}
+    // Tenta window.storage primeiro (persiste entre sessões no Claude)
+    if(typeof window.storage !== 'undefined'){
+      try{
+        const res = await window.storage.get(SAVE_KEY);
+        if(res && res.value) raw = res.value;
+      } catch(e){}
     }
-    if(!raw) raw = localStorage.getItem(SAVE_KEY);
+    // Fallback para localStorage
+    if(!raw){ try{ raw = localStorage.getItem(SAVE_KEY); } catch(e){} }
     if(!raw) return;
     const data = JSON.parse(raw);
-    if(data.unlockedPhases) unlockedPhases = data.unlockedPhases;
-    if(data.unlockedPlants) unlockedPlants = data.unlockedPlants;
+    // Descarta saves antigos (sem versão) que tinham tudo desbloqueado
+    if(!data.v || data.v < SAVE_VERSION) return;
     if(data.lang) lang = data.lang;
     if(data.lastDeck) deck = data.lastDeck;
-    console.log('✅ Progresso carregado: fases='+unlockedPhases.length+' plantas='+unlockedPlants.length);
+    if(data.unlockedPhases && data.unlockedPhases.length) unlockedPhases = data.unlockedPhases;
+    if(data.unlockedPlants && data.unlockedPlants.length) unlockedPlants = data.unlockedPlants;
   } catch(e){ console.warn('Load falhou:', e); }
 }
 
@@ -445,6 +540,40 @@ function pname(id){ return lang==='en'?(PD[id].en||PD[id].pt):PD[id].pt; }
 
 // unlock after completing phase N
 const UNLOCK_AFTER={1:'nuvena',3:'tomate',4:'batata',7:'super',9:'cocoliche',11:'banana',13:'abacanhao',15:'perena'};
+
+// Tutorial data for each plant
+const PLANT_TUTORIAL={
+  nuvena:    { desc:'Flutua sobre o jardim e produz gotas automaticamente a cada 5s.', tip:'💡 Coloque ela longe dos robôs — ela é fraquinha! Ótima logo no início da fase para garantir renda.', en_desc:'Floats over the garden and produces drops every 5s automatically.', en_tip:'💡 Keep her away from robots — she is fragile! Great at the start of a phase for income.' },
+  tomate:    { desc:'Explode causando 80 de dano em área ao redor. Se autodestrói ao explodir!', tip:'💡 Coloque na frente de um grupo de robôs para maximizar o estrago. Perfeito contra hordas!', en_desc:'Explodes dealing 80 area damage. Destroys itself after exploding!', en_tip:'💡 Place in front of a group of robots to maximize damage. Perfect against hordes!' },
+  batata:    { desc:'Parede durona com 100 de HP que bloqueia e segura os robôs por bastante tempo.', tip:'💡 Use na mesma coluna que seus atiradores para protegê-los. Ela pulsa quando tá quase destruída!', en_desc:'Tough wall with 100 HP that blocks and holds robots for a long time.', en_tip:'💡 Use in the same column as your shooters to protect them. She pulses when almost destroyed!' },
+  super:     { desc:'Versão turbinada do Diparaçaí! Atira projéteis que causam 60 de dano — 3x mais forte!', tip:'💡 Custa 7 gotas e demora mais pra recarregar, mas vale cada centavo. Ideal contra robôs com escudo!', en_desc:'Turbo version of Shootacai! Fires projectiles dealing 60 damage — 3x stronger!', en_tip:'💡 Costs 7 drops and recharges slower, but worth every cent. Great against shielded robots!' },
+  cocoliche: { desc:'Rola por toda a fileira destruindo todos os robôs no caminho. Mata Robôs Boliche instantaneamente!', tip:'💡 Guarde para quando tiver muitos robôs na mesma linha. Não precisa de nada além de uma boa posição!', en_desc:'Rolls through the entire row destroying all robots. Instantly kills Bowling Robots!', en_tip:'💡 Save for when many robots are in the same lane. Just needs a good position!' },
+  banana:    { desc:'Casca escorregadia que faz os robôs tropeçarem e morrerem. Mata até 5 robôs antes de desaparecer.', tip:'💡 Robôs Molhados adoram cair nessa! É a única coisa que os derruba. Coloque na entrada dos robôs.', en_desc:'Slippery peel that makes robots trip and die. Kills up to 5 robots before disappearing.', en_tip:'💡 Wet Robots love to slip on it! It is the only thing that defeats them. Place at robot entry.' },
+  abacanhao: { desc:'Canhão poderoso com 90 HP! Clique nele durante o jogo para disparar um projétil de 40 de dano.', tip:'💡 Você controla quando ele atira! Clique nele para acionar o disparo. Combine com Batata na frente para proteção.', en_desc:'Powerful cannon with 90 HP! Click it during the game to fire a 40-damage projectile.', en_tip:'💡 You control when it fires! Click it to trigger a shot. Combine with Potato Wall in front for protection.' },
+  perena:    { desc:'Planta mágica que ao ser colocada concede 30 gotas imediatamente e desaparece!', tip:'💡 Use no início da fase ou quando estiver sem gotas. Planeje bem — ela aparece e some na hora!', en_desc:'Magical plant that grants 30 drops immediately upon placement and disappears!', en_tip:'💡 Use at the start of a phase or when out of drops. Plan carefully — it appears and vanishes instantly!' },
+};
+
+let pendingTutorial=null; // plant id to show tutorial for
+
+function showPlantTutorial(plantId){
+  const tut=PLANT_TUTORIAL[plantId];
+  const pd=PD[plantId];
+  if(!tut||!pd) return;
+  pendingTutorial=plantId;
+  document.getElementById('tut-img').src = IMGS[pd.img]||'';
+  document.getElementById('tut-name').textContent = lang==='en'?(pd.en||pd.pt):pd.pt;
+  document.getElementById('tut-cost').textContent = tr('cost-label')+' '+pd.cost+' '+tr('recharge-label')+' '+(pd.rc/1000)+'s';
+  document.getElementById('tut-desc').textContent = lang==='en'?tut.en_desc:tut.desc;
+  document.getElementById('tut-tip').innerHTML = lang==='en'?tut.en_tip:tut.tip;
+  document.getElementById('ovl-tutorial').classList.add('on');
+}
+
+function closeTutorial(){
+  document.getElementById('ovl-tutorial').classList.remove('on');
+  pendingTutorial=null;
+  // Mostra o overlay de vitória depois do tutorial
+  document.getElementById('ovl-win').classList.add('on');
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROBOT DEFINITIONS — speed in cells-per-second
@@ -493,6 +622,10 @@ window.addEventListener('load', async ()=>{
   playMusic('aud-menu');
   setTimeout(()=>show('s-menu'), 5500);
 });
+
+// Salva automaticamente ao fechar/sair da página
+window.addEventListener('beforeunload', ()=>{ save(); });
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') save(); });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAP
@@ -598,24 +731,9 @@ function validRC(r,c){ return r>=0&&r<ROWS&&c>=0&&c<COLS; }
 
 function resizeCanvas(){
   const wrap=document.getElementById('g-board-wrap');
-  const wrapW=wrap.clientWidth||300;
-  const wrapH=wrap.clientHeight||300;
-  // Mantém proporção 9:16 portrait ou 16:9 landscape — detecta a melhor
-  const isPortrait = wrapH > wrapW;
-  const ratio = isPortrait ? (9/16) : (16/9);
-  let w, h;
-  if(isPortrait){
-    // Modo retrato: usa toda a altura, limita largura
-    h = wrapH; w = Math.round(h * ratio);
-    if(w > wrapW){ w = wrapW; h = Math.round(w / ratio); }
-  } else {
-    // Modo paisagem: mantém 16:9 sem achatar
-    if(wrapW/wrapH > ratio){
-      h = wrapH; w = Math.round(h * ratio);
-    } else {
-      w = wrapW; h = Math.round(w / ratio);
-    }
-  }
+  const w=wrap.clientWidth||300;
+  const h=wrap.clientHeight||300;
+  // Preenche toda a área disponível sem distorcer (sem barrinhas pretas)
   const board=document.getElementById('g-board');
   board.style.width=w+'px';
   board.style.height=h+'px';
@@ -638,6 +756,11 @@ let totalR=0, killedR=0, lastT=0, animId=null;
 let hoverR=-1, hoverC=-1;
 let fldImg=null;
 
+// BOSS STATE
+let boss=null;
+const BOSS_HP=1000;
+const BOSS_PHASE=40; // fase 15 do período Noite
+
 // ─────────────────────────────────────────────────────────────────────────────
 // START GAME
 // ─────────────────────────────────────────────────────────────────────────────
@@ -646,6 +769,7 @@ function startGame(){
   spawnQueue=[]; spawnTimer=0; dropTimer=0;
   drops=3; selCard=null; running=false; paused=false; ended=false;
   totalR=0; killedR=0; lastT=0; hoverR=-1; hoverC=-1;
+  boss=null;
   if(animId){ cancelAnimationFrame(animId); animId=null; }
   document.querySelectorAll('.fdrop-sky,.fdrop-plant').forEach(e=>e.remove());
 
@@ -709,9 +833,13 @@ function updateAfford(){
   });
 }
 function updateProg(){
-  // Barra só enche quando todos spawnaram; mostra progresso dos mortos sobre o total
-  const spawnedSoFar = totalR - spawnQueue.length;
-  const pct = spawnedSoFar > 0 ? (killedR / totalR) * 100 : 0;
+  let pct;
+  if(boss && curPhase===BOSS_PHASE){
+    pct = boss ? (1 - boss.hp/boss.maxHp)*100 : 0;
+  } else {
+    const spawnedSoFar = totalR - spawnQueue.length;
+    pct = spawnedSoFar > 0 ? (killedR / totalR) * 100 : 0;
+  }
   document.getElementById('g-prog-bar').style.width = pct + '%';
 }
 
@@ -736,8 +864,8 @@ canvas.addEventListener('click',e=>{
   if(plants[key]&&plants[key].type==='clickshooter'){ plants[key].trigger=true; return; }
 
   if(!selCard) return;
-  if(!validRC(row,col)){ showToast(lang==='en'?'⚠️ Place on the grid only!':'⚠️ Só nos quadradinhos!'); return; }
-  if(plants[key]){ showToast(lang==='en'?'⚠️ Cell occupied!':'⚠️ Célula ocupada!'); return; }
+  if(!validRC(row,col)){ showToast(tr('grid-only')); return; }
+  if(plants[key]){ showToast(tr('occupied')); return; }
 
   const p=PD[selCard];
   if(drops<p.cost){ showToast(tr('no-drops')); return; }
@@ -788,11 +916,18 @@ function doBomb(pl){
   if(!plants[pl.key]) return;
   const c=CC(pl.row,pl.col);
   robots.forEach(r=>{ if(r.dead) return; const dx=r.x-c.x,dy=r.y-c.y; if(Math.hypot(dx,dy)<CW()*2.2) dmgRobot(r,pl.dmg); });
+  // Bomba também atinge o chefão se estiver na área de explosão
+  if(boss&&boss.hp>0){
+    const sc=canvas.height/500*0.88, bx=canvas.width-20*sc;
+    if(Math.abs(c.x-bx)<CW()*3) dmgBoss(pl.dmg);
+  }
   delete plants[pl.key];
 }
 function doRoller(pl){
   if(!plants[pl.key]) return;
   robots.filter(r=>!r.dead&&r.row===pl.row).forEach(r=>dmgRobot(r,pl.dmg));
+  // Roller percorre a fileira inteira e acerta o chefão se estiver na mesma linha
+  if(boss&&boss.hp>0) dmgBoss(pl.dmg);
   delete plants[pl.key];
 }
 
@@ -843,6 +978,21 @@ function buildSpawnQueue(){
     const [rid,rdef]=pool[Math.floor(Math.random()*pool.length)];
     spawnQueue.push({rid,rdef,row:Math.floor(Math.random()*ROWS),delay:t});
     t += hordeInterval;
+  }
+
+  // CHEFÃO — fase 40 (fase 15 Noite): sem fila normal, robôs saem só pelo alçapão
+  if(curPhase===BOSS_PHASE){
+    spawnQueue=[];
+    totalR=1; // só o chefão conta pra vitória
+    boss={
+      hp:BOSS_HP, maxHp:BOSS_HP,
+      hatchT:5000, clawT:0, fireT:0,
+      hatchOpen:false, hatchAnim:0,
+      clawAnim:0, clawRow:-1, clawDoing:false,
+      fireAnim:0, fireRow:-1, fireDoing:false,
+      walkX:0, walkDir:1, // andar pra esquerda e direita
+    };
+    return;
   }
 
   spawnQueue.sort((a,b)=>a.delay-b.delay);
@@ -938,6 +1088,7 @@ function loop(ts){
     updRobots(dt);
     updProjs(dt);
     updCDs(dt);
+    if(boss) { updBoss(dt); checkProjBoss(); }
     checkWin();
   }
   draw();
@@ -957,7 +1108,7 @@ function updPlants(dt){
         const tgt=nearestInRow(pl.row, pl.col);
         if(tgt){
           const {x,y}=CC(pl.row,pl.col);
-          projs.push({x,y,tid:tgt.id,dmg:pl.dmg,dead:false,tx:tgt.x,ty:tgt.y});
+          projs.push({x,y,tid:tgt.id,dmg:pl.dmg,dead:false,tx:tgt.x,ty:tgt.y,pid:pl.id,isBossTarget:tgt.isBoss||false});
         }
       }
     }
@@ -967,10 +1118,23 @@ function updPlants(dt){
     }
   });
 }
+function bossHitPos(){
+  // Ponto de impacto — núcleo no peito do chefão, usa mesma escala do drawBoss
+  const sc = canvas.height / 500 * 1.15;
+  return { x: canvas.width - 50*sc, y: canvas.height * 0.5 };
+}
+
 function nearestInRow(row, col){
   const px=CC(row,col).x;
-  return robots.filter(r=>!r.dead&&!r.slipping&&r.row===row&&r.x>px)
-               .sort((a,b)=>a.x-b.x)[0]||null;
+  const robot = robots.filter(r=>!r.dead&&!r.slipping&&r.row===row&&r.x>px)
+                      .sort((a,b)=>a.x-b.x)[0]||null;
+  if(robot) return robot;
+  // Na fase do chefão, se não tem robô na fileira, mira no chefão
+  if(curPhase===BOSS_PHASE && boss && boss.hp>0){
+    const {x,y} = bossHitPos();
+    return {id:'boss', x, y, isBoss:true};
+  }
+  return null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -984,13 +1148,13 @@ function updRobots(dt){
     // Slipping (banana death animation)
     if(r.slipping){
       r.slipT+=dt; r.slipAngle+=dtS*10; r.y+=dtS*40;
-      if(r.slipT>=700){ r.dead=true; killedR++; updateProg(); }
+      if(r.slipT>=700){ r.dead=true; r.slipping=false; killedR++; updateProg(); }
       continue;
     }
 
     // Reached left edge of grid → LOSE
     if(r.x < GL()-CW()*0.3){
-      r.dead=true;
+      r.dead=true; killedR++; // conta como morto para não travar win condition
       if(!ended) triggerLose();
       continue;
     }
@@ -1052,6 +1216,21 @@ function updProjs(dt){
   const SPEED=8; // pixels per frame (approx 60fps)
   projs.forEach(p=>{
     if(p.dead) return;
+    // Projétil mirando no chefão
+    if(p.isBossTarget){
+      if(boss && boss.hp>0){
+        const bp=bossHitPos(); p.tx=bp.x; p.ty=bp.y;
+      }
+      const dx=p.tx-p.x, dy=p.ty-p.y, dist=Math.hypot(dx,dy);
+      if(dist<=SPEED+2){
+        p.dead=true;
+        if(boss&&boss.hp>0) dmgBoss(p.dmg);
+      } else {
+        p.x+=dx/dist*SPEED; p.y+=dy/dist*SPEED;
+      }
+      return;
+    }
+    // Projétil mirando num robô
     const tgt=robots.find(r=>r.id===p.tid&&!r.dead&&!r.slipping);
     if(tgt){ p.tx=tgt.x; p.ty=tgt.y; }
     const dx=p.tx-p.x, dy=p.ty-p.y, dist=Math.hypot(dx,dy);
@@ -1195,20 +1374,384 @@ function draw(){
     }
   });
 
+  // Boss
+  if(boss && boss.hp>0) drawBoss();
+
   // Projectiles
   projs.forEach(p=>{
     if(p.dead) return;
-    ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2);
-    ctx.fillStyle='#8800ff'; ctx.fill();
-    ctx.strokeStyle='#cc88ff'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    if(p.pid==='abacanhao'){
+      // Abacaxi — corpo amarelo oval + folhas verdes no topo
+      // Corpo
+      ctx.beginPath(); ctx.ellipse(0,1,5,7,0,0,Math.PI*2);
+      ctx.fillStyle='#f5c800'; ctx.fill();
+      ctx.strokeStyle='#b8860b'; ctx.lineWidth=1.2; ctx.stroke();
+      // Listras do abacaxi
+      ctx.strokeStyle='#c8a000'; ctx.lineWidth=0.8;
+      ctx.beginPath(); ctx.moveTo(-2,-4); ctx.lineTo(2,4); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(2,-4); ctx.lineTo(-2,4); ctx.stroke();
+      // Folhas
+      ctx.fillStyle='#1a8000';
+      ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(-3,-11); ctx.lineTo(0,-9); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(3,-11); ctx.lineTo(0,-9); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(0,-12); ctx.lineTo(1,-9); ctx.closePath(); ctx.fill();
+    } else if(p.pid==='super'){
+      // Super Diparaçaí — bola de açaí maior e mais brilhante
+      ctx.beginPath(); ctx.arc(0,0,6,0,Math.PI*2);
+      ctx.fillStyle='#5500cc'; ctx.fill();
+      ctx.strokeStyle='#cc44ff'; ctx.lineWidth=2; ctx.stroke();
+      ctx.beginPath(); ctx.arc(-2,-2,2,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fill();
+    } else {
+      // Diparaçaí normal — bolinha roxa de açaí
+      ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2);
+      ctx.fillStyle='#8800ff'; ctx.fill();
+      ctx.strokeStyle='#cc88ff'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.beginPath(); ctx.arc(-1.5,-1.5,1.5,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fill();
+    }
+    ctx.restore();
   });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// WIN / LOSE
+// BOSS UPDATE
 // ─────────────────────────────────────────────────────────────────────────────
+function updBoss(dt){
+  if(!boss||boss.hp<=0) return;
+
+  // ANDANDO pra esquerda e direita (vai e vem 60px)
+  boss.walkX += boss.walkDir * dt * 0.04;
+  if(boss.walkX >  60){ boss.walkX= 60; boss.walkDir=-1; }
+  if(boss.walkX < -60){ boss.walkX=-60; boss.walkDir= 1; }
+
+  // Alçapão só abre visualmente quando boss perde HP (controlado pelo dmgBoss)
+  if(boss.hatchOpen){
+    boss.hatchAnim+=dt;
+    if(boss.hatchAnim>2500) boss.hatchOpen=false;
+  }
+
+  // GARRA — animação
+  if(boss.clawDoing){
+    boss.clawAnim+=dt;
+    if(boss.clawAnim>=1000){
+      Object.keys(plants).forEach(k=>{ if(plants[k]&&plants[k].row===boss.clawRow) delete plants[k]; });
+      boss.clawDoing=false; boss.clawRow=-1;
+    }
+  }
+
+  // FOGO — animação
+  if(boss.fireDoing){
+    boss.fireAnim+=dt;
+    if(boss.fireAnim>=1000){
+      Object.keys(plants).forEach(k=>{ if(plants[k]&&plants[k].row===boss.fireRow) delete plants[k]; });
+      boss.fireDoing=false; boss.fireRow=-1;
+    }
+  }
+}
+
+function dmgBoss(dmg){
+  if(!boss||boss.hp<=0) return;
+  const hpBefore = boss.hp;
+  boss.hp = Math.max(0, boss.hp - dmg);
+  updateProg();
+
+  // A cada 100 de dano acumulado, dispara um poder
+  const threshold = 100;
+  const crossedBefore = Math.floor((BOSS_HP - hpBefore) / threshold);
+  const crossedAfter  = Math.floor((BOSS_HP - boss.hp)  / threshold);
+  if(crossedAfter > crossedBefore){
+    const power = crossedAfter % 3; // alterna: 0=garra, 1=fogo, 2=robôs
+    if(power === 0 && !boss.clawDoing){
+      boss.clawDoing=true; boss.clawAnim=0;
+      boss.clawRow=Math.floor(Math.random()*ROWS);
+      showToast('🦾 '+(lang==='en'?'Claw attack!':'Ataque de garra!'),2000);
+    } else if(power === 1 && !boss.fireDoing){
+      boss.fireDoing=true; boss.fireAnim=0;
+      boss.fireRow=Math.floor(Math.random()*ROWS);
+      showToast('🔥 '+(lang==='en'?'Fire attack!':'Ataque de fogo!'),2000);
+    } else {
+      // Solta robôs pela direita
+      boss.hatchOpen=true; boss.hatchAnim=0;
+      const pool=Object.entries(RD).filter(([,r])=>r.ph<=curPhase);
+      for(let i=0;i<3;i++){
+        const [rid,rdef]=pool[Math.floor(Math.random()*pool.length)];
+        const row=Math.floor(Math.random()*ROWS);
+        robots.push({
+          id:Date.now()+Math.random()+i, rid, row,
+          x:canvas.width+CW()*0.8, y:CC(row,COLS-1).y,
+          hp:rdef.hp, maxHp:rdef.hp, shp:rdef.sh,
+          spd:rdef.spd, dmg:rdef.dmg, dr:rdef.dr,
+          eatT:0, special:rdef.special||null,
+          dead:false, eating:false, slipping:false, slipT:0, slipAngle:0, shootT:0,
+        });
+      }
+      showToast('☠️ '+(lang==='en'?'Boss spawned minions!':'Chefão soltou robôs!'),2500);
+    }
+  }
+
+  if(boss.hp<=0){
+    killedR=1; updateProg();
+    setTimeout(()=>triggerWin(), 1200);
+  }
+}
+
+function drawBoss(){
+  if(!boss||boss.hp<=0) return;
+  const sc = canvas.height / 500 * 1.15;
+  // Exatamente metade do chefão na tela (centro na borda direita + walkX)
+  const bx = canvas.width + (boss.walkX||0) * sc * 0.4;
+  const by = canvas.height * 0.52;
+
+  ctx.save();
+  ctx.beginPath(); ctx.rect(0,0,canvas.width,canvas.height); ctx.clip();
+  ctx.translate(bx, by);
+  ctx.scale(sc, sc);
+
+  const now = performance.now();
+  const walkStep = Math.sin(now/350)*5; // balanço ao andar
+
+  // Paleta só preto → cinza claro
+  const CL = '#d0d0d0'; // cinza claro — corpo
+  const CM = '#999999'; // cinza médio
+  const CD = '#555555'; // cinza escuro — contornos
+  const CB = '#b0b0b0'; // cinza claro — antes era quase preto
+  const CW2= '#eeeeee'; // branco
+
+  // SOMBRA
+  ctx.save(); ctx.globalAlpha=0.18;
+  ctx.beginPath(); ctx.ellipse(-10,228,75,11,0,0,Math.PI*2);
+  ctx.fillStyle='#000'; ctx.fill(); ctx.restore();
+
+  // PERNAS (balançam levemente ao andar)
+  ctx.fillStyle=CM; ctx.strokeStyle=CD; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.roundRect(-70,120+walkStep,40,90,8); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(30,120-walkStep,40,90,8); ctx.fill(); ctx.stroke();
+
+  // JOELHOS
+  ctx.fillStyle=CL; ctx.strokeStyle=CD; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.arc(-50,120+walkStep,16,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(50,120-walkStep,16,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=CW2;
+  ctx.beginPath(); ctx.arc(-50,120+walkStep,7,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(50,120-walkStep,7,0,Math.PI*2); ctx.fill();
+
+  // PERNAS INFERIORES
+  ctx.fillStyle=CM; ctx.strokeStyle=CD;
+  ctx.beginPath(); ctx.roundRect(-72,155+walkStep,40,72,7); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(32,155-walkStep,40,72,7); ctx.fill(); ctx.stroke();
+
+  // PÉS
+  ctx.fillStyle=CB; ctx.strokeStyle=CD; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.ellipse(-52,230+walkStep,32,20,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(52,230-walkStep,32,20,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle=CM; ctx.lineWidth=2;
+  [[-70,234+walkStep],[-54,238+walkStep],[-36,234+walkStep]].forEach(([gx,gy])=>{
+    ctx.beginPath(); ctx.moveTo(gx,gy); ctx.quadraticCurveTo(gx,gy+10,gx+7,gy+4); ctx.stroke();
+  });
+  [[34,234-walkStep],[50,238-walkStep],[68,234-walkStep]].forEach(([gx,gy])=>{
+    ctx.beginPath(); ctx.moveTo(gx,gy); ctx.quadraticCurveTo(gx,gy+10,gx+7,gy+4); ctx.stroke();
+  });
+
+  // ESCOTILHA entre pernas
+  const hatchPct = boss.hatchOpen ? Math.min(1,boss.hatchAnim/400) : Math.max(0,1-(boss.hatchAnim-2200)/400);
+  ctx.fillStyle=CB; ctx.strokeStyle=CM; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-28,138,56,42,6); ctx.fill(); ctx.stroke();
+  if(hatchPct>0.05){
+    ctx.save(); ctx.globalAlpha=hatchPct*0.85;
+    ctx.fillStyle='#ffaa00';
+    ctx.beginPath(); ctx.roundRect(-23,141,46,36,4); ctx.fill();
+    ctx.globalAlpha=hatchPct*0.5;
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.roundRect(-17,146,34,26,3); ctx.fill();
+    ctx.restore();
+  }
+  // portas abrindo
+  const openW=hatchPct*28;
+  ctx.fillStyle=CM;
+  ctx.beginPath(); ctx.rect(-56,138,openW,42); ctx.fill();
+  ctx.beginPath(); ctx.rect(28,138,openW,42); ctx.fill();
+
+  // CORPO
+  ctx.fillStyle=CL; ctx.strokeStyle=CD; ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.moveTo(-100,-60); ctx.lineTo(-105,122); ctx.lineTo(105,122); ctx.lineTo(100,-60);
+  ctx.quadraticCurveTo(0,-80,-100,-60);
+  ctx.fill(); ctx.stroke();
+
+  // PLACA PEITO
+  ctx.fillStyle=CB; ctx.strokeStyle=CM; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-65,0,130,80,8); ctx.fill(); ctx.stroke();
+  // núcleo energia
+  const pulse=Math.sin(now/280)*0.3+0.7;
+  ctx.beginPath(); ctx.arc(0,40,28,0,Math.PI*2); ctx.fillStyle=`rgba(200,200,200,${pulse*0.15})`; ctx.fill();
+  ctx.beginPath(); ctx.arc(0,40,18,0,Math.PI*2); ctx.fillStyle=`rgba(220,220,220,${pulse*0.3})`; ctx.fill();
+  ctx.beginPath(); ctx.arc(0,40,10,0,Math.PI*2); ctx.fillStyle=CM; ctx.fill();
+  ctx.beginPath(); ctx.arc(0,40,5,0,Math.PI*2);  ctx.fillStyle=CW2; ctx.fill();
+
+  // OMBROS
+  ctx.fillStyle=CM; ctx.strokeStyle=CD; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.ellipse(-115,-20,28,22,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(115,-20,28,22,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+
+  // BRAÇO GARRA (esquerdo) — estica pela tela durante ataque
+  const clawPct  = boss.clawDoing ? boss.clawAnim/1000 : 0;
+  const clawReach= boss.clawDoing ? -Math.sin(clawPct*Math.PI)*580 : 0;
+  const clawY    = boss.clawDoing && boss.clawRow>=0
+    ? (GT()+boss.clawRow*CH()+CH()/2 - by)/sc : 20;
+  ctx.save();
+  ctx.translate(-115,-20);
+  ctx.fillStyle=CM; ctx.strokeStyle=CD; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-18,0,36,90,10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=CL; ctx.strokeStyle=CD;
+  ctx.beginPath(); ctx.arc(0,90,12,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  if(boss.clawDoing){
+    ctx.strokeStyle=CM; ctx.lineWidth=22;
+    ctx.beginPath(); ctx.moveTo(0,90); ctx.lineTo(clawReach,clawY+20); ctx.stroke();
+    ctx.strokeStyle=CD; ctx.lineWidth=4;
+    ctx.beginPath(); ctx.moveTo(0,90); ctx.lineTo(clawReach,clawY+20); ctx.stroke();
+    ctx.save(); ctx.translate(clawReach,clawY+20);
+    [[-18],[-6],[6],[18]].forEach(([ox])=>{
+      ctx.strokeStyle=CB; ctx.lineWidth=10;
+      ctx.beginPath(); ctx.moveTo(ox,0); ctx.lineTo(ox*1.3,-32); ctx.stroke();
+      ctx.strokeStyle=CM; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(ox,0); ctx.lineTo(ox*1.3,-32); ctx.stroke();
+    });
+    ctx.restore();
+  } else {
+    [[-20,14],[-8,18],[8,18],[20,14]].forEach(([ox,oy])=>{
+      ctx.beginPath(); ctx.moveTo(ox,102); ctx.quadraticCurveTo(ox*1.4,118+oy,ox*0.8,130+oy);
+      ctx.strokeStyle=CB; ctx.lineWidth=8; ctx.stroke();
+      ctx.strokeStyle=CM; ctx.lineWidth=2; ctx.stroke();
+    });
+  }
+  ctx.restore();
+
+  // BRAÇO CANHÃO (direito)
+  const fireRecoil = boss.fireDoing ? Math.sin(boss.fireAnim/1000*Math.PI)*14 : 0;
+  ctx.save();
+  ctx.translate(115,-20);
+  ctx.fillStyle=CM; ctx.strokeStyle=CD; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-18,0,36,90,10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=CL; ctx.strokeStyle=CD;
+  ctx.beginPath(); ctx.arc(0,90,12,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=CB; ctx.strokeStyle=CM; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-12,90,24,55+fireRecoil,5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=CM;
+  ctx.beginPath(); ctx.roundRect(-14,90,28,9,3); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(-14,108,28,7,3); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(-14,124,28,6,3); ctx.fill();
+  ctx.fillStyle=CB; ctx.strokeStyle='#aaa'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.ellipse(0,147+fireRecoil,11,5,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  if(boss.fireDoing && boss.fireAnim>500){
+    const fa=Math.min(1,(boss.fireAnim-500)/500);
+    ctx.save(); ctx.globalAlpha=fa*0.85;
+    ctx.fillStyle=CM;
+    ctx.beginPath(); ctx.ellipse(-30,152+fireRecoil,8,28*fa,0.2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=CW2;
+    ctx.beginPath(); ctx.ellipse(-30,154+fireRecoil,4,14*fa,0.2,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
+
+  // PESCOÇO
+  ctx.fillStyle=CB; ctx.strokeStyle=CD; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-22,-82,44,26,6); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=CM; ctx.beginPath(); ctx.roundRect(-18,-78,36,6,3); ctx.fill();
+
+  // CABEÇA
+  const headBob = Math.sin(now/700)*4;
+  ctx.fillStyle=CL; ctx.strokeStyle=CD; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.roundRect(-80,-182+headBob,160,102,16); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=CM; ctx.strokeStyle=CD; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-65,-190+headBob,130,16,6); ctx.fill(); ctx.stroke();
+
+  // antenas
+  ctx.strokeStyle=CD; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(-40,-190+headBob); ctx.lineTo(-55,-222+headBob); ctx.stroke();
+  ctx.fillStyle=CM; ctx.strokeStyle=CD; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(-55,-224+headBob,7,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=CW2; ctx.beginPath(); ctx.arc(-55,-224+headBob,3,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle=CD; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(40,-190+headBob); ctx.lineTo(55,-222+headBob); ctx.stroke();
+  ctx.fillStyle=CM; ctx.strokeStyle=CD; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(55,-224+headBob,7,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=CW2; ctx.beginPath(); ctx.arc(55,-224+headBob,3,0,Math.PI*2); ctx.fill();
+
+  // VISEIRA
+  ctx.fillStyle=CB; ctx.strokeStyle=CD; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(-68,-167+headBob,136,50,10); ctx.fill(); ctx.stroke();
+  // olho esq (cinza claro)
+  ctx.beginPath(); ctx.ellipse(-34,-143+headBob,20,14,0,0,Math.PI*2);
+  ctx.fillStyle=CB; ctx.strokeStyle=CM; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(-34,-143+headBob,11,8,0,0,Math.PI*2); ctx.fillStyle=CD; ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-34,-143+headBob,5,4,0,0,Math.PI*2); ctx.fillStyle=CW2; ctx.fill();
+  // olho dir (cinza)
+  ctx.beginPath(); ctx.ellipse(34,-143+headBob,20,14,0,0,Math.PI*2);
+  ctx.fillStyle=CB; ctx.strokeStyle=CM; ctx.lineWidth=2; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(34,-143+headBob,11,8,0,0,Math.PI*2); ctx.fillStyle=CD; ctx.fill();
+  ctx.beginPath(); ctx.ellipse(34,-143+headBob,5,4,0,0,Math.PI*2); ctx.fillStyle=CW2; ctx.fill();
+  // sobrancelhas
+  ctx.strokeStyle=CD; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(-60,-158+headBob); ctx.lineTo(-18,-164+headBob); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(18,-164+headBob); ctx.lineTo(60,-158+headBob); ctx.stroke();
+  // boca grade
+  ctx.fillStyle=CB; ctx.strokeStyle=CD; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect(-50,-122+headBob,100,14,4); ctx.fill(); ctx.stroke();
+  for(let i=0;i<6;i++){
+    ctx.beginPath(); ctx.moveTo(-38+i*16,-122+headBob); ctx.lineTo(-38+i*16,-108+headBob); ctx.stroke();
+  }
+
+  // HP BAR — fora do transform
+  ctx.restore();
+  const bhp=boss.hp/boss.maxHp;
+  const barW=canvas.width*0.55, barH=14;
+  const barX=(canvas.width-barW)/2, barY=8;
+  ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.beginPath(); ctx.roundRect(barX-2,barY-2,barW+4,barH+4,5); ctx.fill();
+  ctx.fillStyle='#333'; ctx.beginPath(); ctx.roundRect(barX,barY,barW,barH,4); ctx.fill();
+  ctx.fillStyle=bhp>0.5?'#aaaaaa':bhp>0.25?'#cccccc':'#eeeeee';
+  ctx.beginPath(); ctx.roundRect(barX,barY,barW*bhp,barH,4); ctx.fill();
+  ctx.strokeStyle='#666'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.roundRect(barX,barY,barW,barH,4); ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.font='bold 10px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('👑 '+(lang==='en'?'BOSS':'CHEFÃO')+' — '+Math.ceil(boss.hp)+'/'+boss.maxHp, canvas.width/2, barY+barH-2);
+
+  // Fileiras atacadas
+  if(boss.clawDoing && boss.clawRow>=0){
+    const rowY=GT()+boss.clawRow*CH();
+    ctx.save(); ctx.globalAlpha=Math.min(0.35,boss.clawAnim/1000*0.35);
+    ctx.fillStyle='#aaaaff'; ctx.fillRect(0,rowY,canvas.width,CH()); ctx.restore();
+  }
+  if(boss.fireDoing && boss.fireRow>=0){
+    const rowY=GT()+boss.fireRow*CH();
+    ctx.save(); ctx.globalAlpha=Math.min(0.45,boss.fireAnim/1000*0.45);
+    ctx.fillStyle='#ffaa00'; ctx.fillRect(0,rowY,canvas.width,CH()); ctx.restore();
+  }
+}
+
+// Hook projéteis no chefão
+function checkProjBoss(){
+  if(!boss||boss.hp<=0) return;
+  const sc  = canvas.height / 500 * 1.15;
+  const bx  = canvas.width + (boss.walkX||0) * sc * 0.4;
+  const hitLeft = bx - 120 * sc;
+  projs.forEach(p=>{
+    if(p.dead||p.isBossTarget) return; // isBossTarget já tratado no updProjs
+    if(p.x >= hitLeft){
+      p.dead=true;
+      dmgBoss(p.dmg);
+    }
+  });
+}
 function checkWin(){
   if(ended||!running) return;
+  // Fase do chefão — vence só quando o boss morrer (dmgBoss chama triggerWin)
+  if(curPhase===BOSS_PHASE){
+    if(boss && boss.hp<=0) return; // triggerWin já foi chamado pelo dmgBoss
+    return;
+  }
   if(spawnQueue.length===0 && robots.filter(r=>!r.dead||r.slipping).length===0 && killedR>=totalR)
     triggerWin();
 }
@@ -1221,12 +1764,61 @@ function triggerWin(){
   let extra='';
   if(pu&&!unlockedPlants.includes(pu)){
     unlockedPlants.push(pu);
-    extra=' 🌿 '+pname(pu)+' '+(lang==='en'?'unlocked!':'desbloqueada!');
-    showToast('🌿 '+pname(pu)+' '+(lang==='en'?'unlocked!':'desbloqueada!'),4000);
+    extra=' 🌿 '+pname(pu)+' '+tr('unlocked');
+    showToast('🌿 '+pname(pu)+' '+tr('unlocked'),4000);
   }
   save();
-  document.getElementById('win-msg').textContent=(lang==='en'?'Phase':'Fase')+' '+localN(curPhase)+' '+(lang==='en'?'complete!':'completa!')+extra;
-  document.getElementById('ovl-win').classList.add('on');
+
+  // Fase final — tela de parabéns especial
+  if(curPhase===BOSS_PHASE){
+    showEndingScreen();
+    return;
+  }
+
+  // Contador de fases ganhas — exibe anúncio a cada AD_EVERY vitórias
+  winsCount++;
+  const showWinUI = ()=>{
+    document.getElementById('win-msg').textContent=tr('phase')+' '+localN(curPhase)+' '+tr('complete')+extra;
+    if(pu&&PLANT_TUTORIAL[pu]){
+      showPlantTutorial(pu);
+    } else {
+      document.getElementById('ovl-win').classList.add('on');
+    }
+  };
+
+  if(winsCount % AD_EVERY === 0){
+    // Pequeno delay para o jingle de vitória tocar antes do anúncio
+    setTimeout(()=> showAd(showWinUI), 1200);
+  } else {
+    showWinUI();
+  }
+}
+
+function showEndingScreen(){
+  const pt = lang==='en';
+  document.getElementById('end-title').textContent = pt ? '🏆 Congratulations!' : '🏆 Parabéns!';
+  document.getElementById('end-sub').textContent = pt
+    ? 'You defeated the Boss Robot and saved the Green Yard!\nThe plants are free — the revolt succeeded!'
+    : 'Você derrotou o Robô Chefão e salvou o Quintal Verde!\nAs plantas são livres — a revolta foi um sucesso!';
+  document.getElementById('end-credits').innerHTML = pt
+    ? `<b>🌿 Green Yard — The Revolt to Robots!</b><br>
+       All 40 phases completed!<br>
+       Thank you for playing ✨`
+    : `<b>🌿 Green Yard — A Revolta dos Robôs!</b><br>
+       Todas as 40 fases concluídas!<br>
+       Obrigado por jogar ✨`;
+  document.getElementById('end-btn').textContent = pt ? 'Back to Menu' : 'Voltar ao Menu';
+  // Animação de confete simples
+  let frame=0;
+  const emojis=['🌿🏆🌿','🎉🌱🎉','🏆✨🏆','🌿🎊🌿'];
+  const el=document.getElementById('end-confetti');
+  const anim=setInterval(()=>{ el.textContent=emojis[frame++%emojis.length]; if(frame>20) clearInterval(anim); },300);
+  document.getElementById('ovl-end').classList.add('on');
+}
+
+function closeEnding(){
+  document.getElementById('ovl-end').classList.remove('on');
+  quitGame();
 }
 function triggerLose(){
   if(ended) return; ended=true; running=false;
@@ -1238,8 +1830,7 @@ function nextPhase(){
   if(curPhase<40) openAlm(curPhase+1);
   else{ stopMusic(); playMusic('aud-menu'); show('s-menu'); }
 }
-function retryPhase(){
-  document.getElementById('ovl-lose').classList.remove('on');
+function retryPhase(){  document.getElementById('ovl-lose').classList.remove('on');
   openAlm(curPhase);
 }
 function quitGame(){
@@ -1247,8 +1838,17 @@ function quitGame(){
   save(); // salva ao sair
   if(animId){ cancelAnimationFrame(animId); animId=null; }
   document.querySelectorAll('.fdrop-sky,.fdrop-plant').forEach(e=>e.remove());
-  ['ovl-win','ovl-lose','ovl-pause'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  ['ovl-win','ovl-lose','ovl-pause','ovl-tutorial','ovl-end'].forEach(id=>document.getElementById(id).classList.remove('on'));
   stopMusic(); playMusic('aud-menu'); show('s-menu');
+}
+function confirmRestart(){
+  const wasRunning=running;
+  if(running){ paused=true; running=false; }
+  if(confirm(lang==='en'?'Restart this phase?':'Reiniciar esta fase?')){
+    restartPhase();
+  } else {
+    if(wasRunning){ paused=false; running=true; lastT=performance.now(); }
+  }
 }
 function restartPhase(){
   document.getElementById('ovl-pause').classList.remove('on');
@@ -1265,6 +1865,75 @@ function pauseGame(){
 function resumeGame(){
   paused=false; lastT=performance.now();
   document.getElementById('ovl-pause').classList.remove('on');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AD SYSTEM — exibe comercial a cada 5 fases ganhas
+// ─────────────────────────────────────────────────────────────────────────────
+const AD_EVERY = 5; // a cada quantas fases
+let winsCount = 0;  // contador de fases ganhas nesta sessão
+let adTimer = null;
+let adCallback = null; // função a chamar após fechar o anúncio
+
+// Banco de anúncios fictícios (substitua por anúncios reais conforme necessário)
+const ADS = [
+  { icon:'🌱', title:'PlantaFácil', sub:'O app que transforma qualquer vaso em jardim. Cuide das suas plantas com lembretes inteligentes!', cta:'Baixar Grátis', url:'#' },
+  { icon:'🤖', title:'RoboDefend', sub:'Você venceu robôs aqui — que tal programar o seu? Curso de robótica para crianças e adultos!', cta:'Saiba Mais', url:'#' },
+  { icon:'💧', title:'AquaVida', sub:'Purificadores de água premium. Hidratação pura como a chuva do Green Yard.', cta:'Ver Oferta', url:'#' },
+  { icon:'🍃', title:'NaturalVerde', sub:'Produtos naturais e orgânicos direto do produtor para a sua mesa. Frete grátis na 1ª compra!', cta:'Comprar Agora', url:'#' },
+  { icon:'🎮', title:'GamersClub+', sub:'Assine e jogue centenas de jogos sem anúncios. Experimente grátis por 7 dias!', cta:'Experimentar', url:'#' },
+];
+let lastAdIdx = -1;
+
+function pickAd(){
+  let idx;
+  do { idx = Math.floor(Math.random() * ADS.length); } while(idx === lastAdIdx && ADS.length > 1);
+  lastAdIdx = idx;
+  return ADS[idx];
+}
+
+function showAd(callback){
+  const ad = pickAd();
+  document.getElementById('ad-brand-icon').textContent = ad.icon;
+  document.getElementById('ad-title').textContent = ad.title;
+  document.getElementById('ad-sub').textContent = ad.sub;
+  document.getElementById('ad-cta').textContent = ad.cta;
+  document.getElementById('ad-cta').dataset.url = ad.url;
+
+  const skipBtn = document.getElementById('ad-skip-btn');
+  const timerEl = document.getElementById('ad-timer');
+  skipBtn.disabled = true;
+  skipBtn.textContent = lang === 'en' ? 'Skip Ad' : 'Pular Anúncio';
+
+  adCallback = callback;
+  document.getElementById('ovl-ad').classList.add('on');
+
+  let secs = 5;
+  timerEl.textContent = lang === 'en' ? `Available in ${secs}s` : `Disponível em ${secs}s`;
+
+  adTimer = setInterval(()=>{
+    secs--;
+    if(secs > 0){
+      timerEl.textContent = lang === 'en' ? `Available in ${secs}s` : `Disponível em ${secs}s`;
+    } else {
+      clearInterval(adTimer); adTimer = null;
+      skipBtn.disabled = false;
+      timerEl.textContent = '';
+    }
+  }, 1000);
+}
+
+function closeAd(){
+  clearInterval(adTimer); adTimer = null;
+  document.getElementById('ovl-ad').classList.remove('on');
+  const cb = adCallback; adCallback = null;
+  if(cb) cb();
+}
+
+function adCTAClick(){
+  const url = document.getElementById('ad-cta').dataset.url;
+  if(url && url !== '#') window.open(url, '_blank');
+  closeAd();
 }
 </script>
 </body>
